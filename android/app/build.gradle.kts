@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.hello_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     // Remove NDK version specification if not using native code
     // ndkVersion = "25.1.8937393"
 
@@ -25,10 +25,10 @@ android {
         applicationId = "com.example.hello_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk = 23
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
     }
 
     buildTypes {

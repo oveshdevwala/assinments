@@ -34,7 +34,7 @@ class HelloApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => sl.sl<AuthBloc>()..add(const InitializeAuthEvent()),
+      create: (context) => sl.sl<AuthBloc>()..add(const CheckAuthStatusEvent()),
       child: MaterialApp.router(
         title: 'SecureAuth',
         debugShowCheckedModeBanner: false,
@@ -47,23 +47,80 @@ class HelloApp extends StatelessWidget {
   }
 }
 
-/// Route wrapper that handles authentication flow
-class AuthRouteWrapper extends StatelessWidget {
-  final Widget child;
-  const AuthRouteWrapper({required this.child, super.key});
+/// Authentication splash screen that handles initial routing
+class AuthSplashScreen extends StatelessWidget {
+  const AuthSplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
-        // Show biometric auth page if enabled and not authenticated
-        if (state.requiresBiometricOnStartup &&
-            state.authenticationStatus != AuthenticationStatus.authenticated) {
-          return const BiometricAuthPage();
-        }
-
-        // Otherwise show the intended page
-        return child;
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.primaryContainer,
+                ],
+              ),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.security,
+                    size: 80,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    'SecureAuth',
+                    style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    state.isLoading ? 'Initializing...' : 'Secure Your Data',
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onPrimary.withOpacity(0.8),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  if (state.isLoading)
+                    CircularProgressIndicator(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  if (state.error != null) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.symmetric(horizontal: 32),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.errorContainer,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        state.error!,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
       },
     );
   }
@@ -71,17 +128,19 @@ class AuthRouteWrapper extends StatelessWidget {
 
 /// Application router configuration
 final GoRouter _router = GoRouter(
-  initialLocation: '/home',
+  initialLocation: '/splash',
   routes: [
+    // Splash/Auth check route
+    GoRoute(
+      path: '/splash',
+      name: 'splash',
+      builder: (context, state) => const AuthSplashScreen(),
+    ),
+    // Authentication routes
     GoRoute(
       path: '/biometric-auth',
       name: 'biometric-auth',
       builder: (context, state) => const BiometricAuthPage(),
-    ),
-    GoRoute(
-      path: '/settings',
-      name: 'settings',
-      builder: (context, state) => const SettingsPage(),
     ),
     GoRoute(
       path: '/pin-setup',
@@ -96,12 +155,63 @@ final GoRouter _router = GoRouter(
         return AuthErrorPage(errorMessage: errorMessage);
       },
     ),
+    // Protected routes - now without AuthGuard to prevent double authentication
     GoRoute(
       path: '/home',
       name: 'home',
-      builder: (context, state) => AuthRouteWrapper(child: const HomePage()),
+      builder: (context, state) => const HomePage(),
+    ),
+    GoRoute(
+      path: '/settings',
+      name: 'settings',
+      builder: (context, state) => const SettingsPage(),
     ),
   ],
+  // Redirect logic for route protection
+  redirect: (context, state) {
+    final authBloc = context.read<AuthBloc>();
+    final authState = authBloc.state;
+
+    final isOnSplash = state.matchedLocation == '/splash';
+    final isOnAuthRoutes = [
+      '/biometric-auth',
+      '/pin-setup',
+      '/auth-error',
+    ].contains(state.matchedLocation);
+    final isOnProtectedRoutes = [
+      '/home',
+      '/settings',
+    ].contains(state.matchedLocation);
+
+    // If we're still initializing, stay on splash
+    if (authState.authenticationStatus == AuthenticationStatus.unknown ||
+        authState.isLoading) {
+      return isOnSplash ? null : '/splash';
+    }
+
+    // If user is authenticated and on auth/splash routes, redirect to home
+    if (authState.isAuthenticated && (isOnAuthRoutes || isOnSplash)) {
+      return '/home';
+    }
+
+    // If user requires initial setup and not on pin-setup
+    if (authState.requiresInitialSetup &&
+        state.matchedLocation != '/pin-setup') {
+      return '/pin-setup';
+    }
+
+    // If user requires authentication and not on auth routes
+    if (authState.requiresAuthentication && !isOnAuthRoutes && !isOnSplash) {
+      return '/biometric-auth';
+    }
+
+    // If user is not authenticated and trying to access protected routes
+    if (!authState.isAuthenticated && isOnProtectedRoutes) {
+      return '/splash';
+    }
+
+    return null; // No redirect needed
+  },
   errorBuilder: (context, state) => Scaffold(
     body: Center(
       child: Column(
@@ -124,7 +234,7 @@ final GoRouter _router = GoRouter(
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-            onPressed: () => context.go('/home'),
+            onPressed: () => context.go('/splash'),
             child: const Text('Go to Home'),
           ),
         ],

@@ -235,9 +235,11 @@ class _PinInputWidgetState extends State<PinInputWidget>
         keyboardType: TextInputType.number,
         obscureText: true,
         maxLength: 1,
+        cursorColor: Colors.transparent,
         style: theme.textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.bold,
           color: theme.colorScheme.onSurface,
+          fontSize: 14,
         ),
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,

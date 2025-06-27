@@ -117,10 +117,8 @@ class _EnhancedAuthPageState extends State<EnhancedAuthPage>
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state.authenticationStatus ==
-              AuthenticationStatus.authenticated) {
-            context.go('/home');
-          }
+          // Let GoRouter handle navigation automatically
+          // No manual navigation needed here
         },
         child: Container(
           decoration: BoxDecoration(

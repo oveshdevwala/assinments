@@ -94,5 +94,10 @@ class CompletePinSetupEvent extends AuthEvent {
   const CompletePinSetupEvent({required this.pin});
 }
 
+/// Event to check authentication status on app startup
+class CheckAuthStatusEvent extends AuthEvent {
+  const CheckAuthStatusEvent();
+}
+
 /// Authentication method enum
 enum AuthenticationMethod { biometric, pin }

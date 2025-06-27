@@ -52,6 +52,12 @@ class AuthState {
   /// Check if we should show authentication options
   bool get shouldShowAuthOptions => isPinSet || isBiometricEnabled;
 
+  /// Check if authentication setup is required (first time setup)
+  bool get requiresInitialSetup => !isPinSet;
+
+  /// Check if authentication is required (PIN is set but user not authenticated)
+  bool get requiresAuthentication => isPinSet && !isAuthenticated;
+
   /// Get user display name
   String get userDisplayName {
     if (credentials?.email != null) {

@@ -95,6 +95,21 @@ class AppTheme {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primaryColor,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          side: const BorderSide(color: primaryColor, width: 1.5),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.1,
+          ),
+        ),
+      ),
     );
   }
 
@@ -102,36 +117,86 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'SF Pro Text',
       colorScheme: const ColorScheme.dark(
         primary: darkPrimaryColor,
         secondary: secondaryColor,
         surface: darkSurface,
+        background: darkBackground,
         error: error,
-        onPrimary: onSecondary,
+        onPrimary: onPrimary,
         onSecondary: onPrimary,
         onSurface: darkOnSurface,
+        onBackground: darkOnBackground,
         onError: onError,
+        outline: Colors.grey,
+        surfaceVariant: Colors.grey,
       ),
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         headlineLarge: headlineLarge,
         headlineMedium: headlineMedium,
+        headlineSmall: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0,
+        ),
         titleLarge: titleLarge,
+        titleMedium: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0,
+        ),
         bodyLarge: bodyLarge,
         bodyMedium: bodyMedium,
         labelLarge: labelLarge,
+        labelMedium: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0,
+        ),
       ),
+      scaffoldBackgroundColor: darkBackground,
       appBarTheme: const AppBarTheme(
-        backgroundColor: darkSurface,
+        backgroundColor: Colors.transparent,
         foregroundColor: darkOnSurface,
         elevation: 0,
         centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w600,
+          color: darkOnSurface,
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: darkPrimaryColor,
-          foregroundColor: onSecondary,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          foregroundColor: onPrimary,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.1,
+          ),
+        ),
+      ),
+      outlinedButtonTheme: OutlinedButtonThemeData(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: darkPrimaryColor,
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          side: const BorderSide(color: darkPrimaryColor, width: 1.5),
+          textStyle: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.1,
+          ),
         ),
       ),
     );

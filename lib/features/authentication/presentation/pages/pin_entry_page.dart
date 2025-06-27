@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../blocs/auth_bloc.dart';
 import '../blocs/auth_state.dart';
 import '../blocs/auth_event.dart';
 import '../widgets/pin_input_widget.dart';
-import '../../../../shared/widgets/app_button.dart';
 
 /// Page for entering PIN to authenticate (not for setup)
 class PinEntryPage extends StatefulWidget {
@@ -66,11 +64,8 @@ class _PinEntryPageState extends State<PinEntryPage>
     return Scaffold(
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state.authenticationStatus ==
-              AuthenticationStatus.authenticated) {
-            context.go('/home');
-          } else if (state.error != null &&
-              state.error!.contains('Wrong PIN')) {
+          // Only handle UI feedback, let GoRouter handle navigation
+          if (state.error != null && state.error!.contains('Wrong PIN')) {
             _shakeOnError();
           }
         },
@@ -181,20 +176,6 @@ class _PinEntryPageState extends State<PinEntryPage>
                           isLoading: state.isLoading,
                           errorText: state.error,
                         ),
-
-                        // Alternative authentication methods
-
-                        // Settings access
-                        TextButton.icon(
-                          onPressed: () => context.go('/settings'),
-                          icon: const Icon(Icons.settings, size: 16),
-                          label: const Text('Settings'),
-                          style: TextButton.styleFrom(
-                            foregroundColor: theme.colorScheme.onSurface
-                                .withOpacity(0.6),
-                          ),
-                        ),
-
                         const SizedBox(height: 24),
                       ],
                     ),

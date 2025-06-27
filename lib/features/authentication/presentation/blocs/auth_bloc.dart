@@ -40,6 +40,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }) : super(const AuthState()) {
     // Register all event handlers
     on<InitializeAuthEvent>(_onInitializeAuth);
+    on<CheckAuthStatusEvent>(_onCheckAuthStatus);
     on<CheckBiometricAvailabilityEvent>(_onCheckBiometricAvailability);
     on<AuthenticateWithBiometricsEvent>(_onAuthenticateWithBiometrics);
     on<AuthenticateWithPinEvent>(_onAuthenticateWithPin);
@@ -87,6 +88,64 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           isLoading: false,
           error: 'Failed to initialize authentication: ${e.toString()}',
+        ),
+      );
+    }
+  }
+
+  /// Handle checking authentication status on app startup
+  Future<void> _onCheckAuthStatus(
+    CheckAuthStatusEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      emit(
+        state.copyWith(
+          isLoading: true,
+          authenticationStatus: AuthenticationStatus.unknown,
+        ),
+      );
+
+      // Check biometric availability and enabled status
+      final biometricInfo = await checkBiometricAvailability();
+      final isBiometricEnabled = await getBiometricEnabled();
+
+      // Check if PIN is set directly
+      final isPinSet = await checkPinSet();
+
+      // Check if we have stored credentials
+      final credentials = await getStoredCredentials();
+
+      // Determine authentication status based on setup
+      AuthenticationStatus authStatus = AuthenticationStatus.unauthenticated;
+
+      // If no PIN is set, user needs to set up authentication
+      if (!isPinSet) {
+        authStatus = AuthenticationStatus.unauthenticated;
+      } else {
+        // PIN is set, user needs to authenticate
+        authStatus = AuthenticationStatus.unauthenticated;
+      }
+
+      emit(
+        state.copyWith(
+          biometricInfo: biometricInfo,
+          canUseBiometric: biometricInfo.isAvailable,
+          isBiometricEnabled: isBiometricEnabled,
+          isPinSet: isPinSet,
+          hasStoredCredentials: credentials != null,
+          authenticationStatus: authStatus,
+          isLoading: false,
+          authFlowState: AuthFlowState.initial,
+          error: null,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          authenticationStatus: AuthenticationStatus.unauthenticated,
+          error: 'Failed to check authentication status: ${e.toString()}',
         ),
       );
     }

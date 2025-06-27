@@ -4,9 +4,18 @@ import '../../domain/entities/user_credentials.dart';
 /// Authentication status enum
 enum AuthenticationStatus { unknown, authenticated, unauthenticated }
 
+/// Authentication flow state enum
+enum AuthFlowState {
+  initial,
+  selectingMethod,
+  authenticatingWithPin,
+  authenticatingWithBiometric,
+}
+
 /// Authentication state
 class AuthState {
   final AuthenticationStatus authenticationStatus;
+  final AuthFlowState authFlowState;
   final UserCredentials? credentials;
   final BiometricInfo? biometricInfo;
   final bool isLoading;
@@ -18,6 +27,7 @@ class AuthState {
 
   const AuthState({
     this.authenticationStatus = AuthenticationStatus.unknown,
+    this.authFlowState = AuthFlowState.initial,
     this.credentials,
     this.biometricInfo,
     this.isLoading = false,
@@ -39,6 +49,9 @@ class AuthState {
   /// Check if biometric authentication is required on app startup
   bool get requiresBiometricOnStartup => isBiometricEnabled && canUseBiometric;
 
+  /// Check if we should show authentication options
+  bool get shouldShowAuthOptions => isPinSet || isBiometricEnabled;
+
   /// Get user display name
   String get userDisplayName {
     if (credentials?.email != null) {
@@ -50,6 +63,7 @@ class AuthState {
   /// Create a copy of the state with updated values
   AuthState copyWith({
     AuthenticationStatus? authenticationStatus,
+    AuthFlowState? authFlowState,
     UserCredentials? credentials,
     BiometricInfo? biometricInfo,
     bool? isLoading,
@@ -61,6 +75,7 @@ class AuthState {
   }) {
     return AuthState(
       authenticationStatus: authenticationStatus ?? this.authenticationStatus,
+      authFlowState: authFlowState ?? this.authFlowState,
       credentials: credentials ?? this.credentials,
       biometricInfo: biometricInfo ?? this.biometricInfo,
       isLoading: isLoading ?? this.isLoading,
@@ -77,11 +92,21 @@ class AuthState {
     return copyWith(error: null);
   }
 
+  /// Reset to initial state
+  AuthState resetFlow() {
+    return copyWith(
+      authFlowState: AuthFlowState.initial,
+      error: null,
+      isLoading: false,
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is AuthState &&
         other.authenticationStatus == authenticationStatus &&
+        other.authFlowState == authFlowState &&
         other.credentials == credentials &&
         other.biometricInfo == biometricInfo &&
         other.isLoading == isLoading &&
@@ -96,6 +121,7 @@ class AuthState {
   int get hashCode {
     return Object.hash(
       authenticationStatus,
+      authFlowState,
       credentials,
       biometricInfo,
       isLoading,
@@ -109,6 +135,6 @@ class AuthState {
 
   @override
   String toString() {
-    return 'AuthState(status: $authenticationStatus, isLoading: $isLoading, hasCredentials: $hasStoredCredentials, canUseBiometric: $canUseBiometric, isPinSet: $isPinSet, isBiometricEnabled: $isBiometricEnabled)';
+    return 'AuthState(status: $authenticationStatus, flowState: $authFlowState, isLoading: $isLoading, hasCredentials: $hasStoredCredentials, canUseBiometric: $canUseBiometric, isPinSet: $isPinSet, isBiometricEnabled: $isBiometricEnabled)';
   }
 }

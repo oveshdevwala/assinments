@@ -7,8 +7,22 @@ import '../blocs/auth_event.dart';
 import '../../../../shared/widgets/app_button.dart';
 
 /// Settings page for managing biometric authentication
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Refresh auth state when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthBloc>().add(const InitializeAuthEvent());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -208,13 +222,15 @@ class SettingsPage extends StatelessWidget {
             ),
             Switch(
               value: isEnabled,
-              onChanged: isAvailable
-                  ? (value) {
-                      context.read<AuthBloc>().add(
-                        ToggleBiometricEvent(enable: value),
-                      );
-                    }
-                  : null,
+              onChanged: (value) {
+                if (value) {
+                  // Navigate to PIN setup page
+                  _navigateToSetup(context);
+                } else {
+                  // Disable biometric authentication and clear PIN
+                  _showDisableDialog(context);
+                }
+              },
             ),
           ],
         ),
@@ -270,5 +286,46 @@ class SettingsPage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  /// Navigate to PIN setup page
+  void _navigateToSetup(BuildContext context) {
+    context.go('/pin-setup');
+  }
+
+  /// Show dialog to disable biometric authentication
+  Future<void> _showDisableDialog(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Disable Biometric Authentication'),
+        content: const Text(
+          'This will disable biometric authentication and remove your stored PIN. You can set it up again later.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Disable'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      // Clear all authentication data
+      context.read<AuthBloc>().add(const LogoutEvent());
+
+      // Show confirmation message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Biometric authentication disabled'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

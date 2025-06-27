@@ -8,6 +8,7 @@ import '../../features/authentication/data/repositories/auth_repository_impl.dar
 import '../../features/authentication/domain/repositories/auth_repository.dart';
 import '../../features/authentication/domain/usecases/authenticate_with_biometrics.dart';
 import '../../features/authentication/domain/usecases/check_biometric_availability.dart';
+import '../../features/authentication/domain/usecases/check_pin_set.dart';
 import '../../features/authentication/domain/usecases/clear_stored_credentials.dart';
 import '../../features/authentication/domain/usecases/get_biometric_enabled.dart';
 import '../../features/authentication/domain/usecases/get_stored_credentials.dart';
@@ -54,6 +55,7 @@ Future<void> init() async {
     // Use cases
     sl.registerLazySingleton(() => AuthenticateWithBiometrics(sl()));
     sl.registerLazySingleton(() => CheckBiometricAvailability(sl()));
+    sl.registerLazySingleton(() => CheckPinSet(sl()));
     sl.registerLazySingleton(() => ClearStoredCredentials(sl()));
     sl.registerLazySingleton(() => GetBiometricEnabled(sl()));
     sl.registerLazySingleton(() => GetStoredCredentials(sl()));
@@ -67,6 +69,7 @@ Future<void> init() async {
       () => AuthBloc(
         authenticateWithBiometrics: sl(),
         checkBiometricAvailability: sl(),
+        checkPinSet: sl(),
         clearStoredCredentials: sl(),
         getBiometricEnabled: sl(),
         getStoredCredentials: sl(),

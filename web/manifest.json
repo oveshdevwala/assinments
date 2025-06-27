@@ -1,6 +1,6 @@
 {
-    "name": "hello_app",
-    "short_name": "hello_app",
+    "name": "bio_assignment",
+    "short_name": "bio_assignment",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

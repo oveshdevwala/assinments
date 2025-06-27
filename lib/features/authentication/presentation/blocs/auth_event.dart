@@ -29,7 +29,14 @@ class SetPinEvent extends AuthEvent {
   const SetPinEvent({required this.pin, required this.confirmPin});
 }
 
-/// Event to verify PIN
+/// Event to verify PIN for authentication
+class AuthenticateWithPinEvent extends AuthEvent {
+  final String pin;
+
+  const AuthenticateWithPinEvent({required this.pin});
+}
+
+/// Event to verify PIN (for general verification)
 class VerifyPinEvent extends AuthEvent {
   final String pin;
 
@@ -62,3 +69,30 @@ class LogoutEvent extends AuthEvent {
 class ClearAllDataEvent extends AuthEvent {
   const ClearAllDataEvent();
 }
+
+/// Event to select authentication method
+class SelectAuthMethodEvent extends AuthEvent {
+  final AuthenticationMethod method;
+
+  const SelectAuthMethodEvent({required this.method});
+}
+
+/// Event to reset authentication flow
+class ResetAuthFlowEvent extends AuthEvent {
+  const ResetAuthFlowEvent();
+}
+
+/// Event to check if PIN is set
+class CheckPinSetEvent extends AuthEvent {
+  const CheckPinSetEvent();
+}
+
+/// Event to complete PIN setup (after validation)
+class CompletePinSetupEvent extends AuthEvent {
+  final String pin;
+
+  const CompletePinSetupEvent({required this.pin});
+}
+
+/// Authentication method enum
+enum AuthenticationMethod { biometric, pin }

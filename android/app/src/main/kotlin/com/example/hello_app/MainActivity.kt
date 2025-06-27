@@ -1,4 +1,4 @@
-package com.example.hello_app
+package com.example.bio_assignment
 
 import androidx.annotation.NonNull
 import io.flutter.embedding.android.FlutterFragmentActivity

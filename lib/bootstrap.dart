@@ -11,6 +11,7 @@ import 'features/authentication/presentation/blocs/auth_state.dart';
 import 'features/authentication/presentation/pages/biometric_auth_page.dart';
 import 'features/authentication/presentation/pages/settings_page.dart';
 import 'features/authentication/presentation/pages/auth_error_page.dart';
+import 'features/authentication/presentation/pages/pin_setup_page.dart';
 
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -81,6 +82,11 @@ final GoRouter _router = GoRouter(
       path: '/settings',
       name: 'settings',
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: '/pin-setup',
+      name: 'pin-setup',
+      builder: (context, state) => const PinSetupPage(),
     ),
     GoRoute(
       path: '/auth-error',
